@@ -45,4 +45,8 @@
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.BookingId">Edit</a> |
     <a asp-action="Index">Back to List</a>
+    @if (Model.BookingStatus == "Confirmed")
+    {
+        <span> | </span> <a asp-controller="Tickets" asp-action="GetTicket" asp-route-bookingId="@Model.BookingId" class="btn btn-primary btn-sm">Get Ticket</a>
+    }
 </div>

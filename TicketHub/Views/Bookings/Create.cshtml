@@ -1,49 +1,56 @@
-﻿@model TicketHub.Models.Booking
+﻿@model TicketHub.Models.ViewModels.BookingCreateViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Book Event";
 }
 
-<h1>Create</h1>
+<h1>Book Event: @Model.EventTitle</h1>
 
-<h4>Booking</h4>
-<hr />
+<div>
+    <h4>Event Details</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Date</dt>
+        <dd class="col-sm-10">@Model.EventDate</dd>
+        <dt class="col-sm-2">Venue</dt>
+        <dd class="col-sm-10">@Model.VenueName</dd>
+    </dl>
+</div>
+
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="BookingDate" class="control-label"></label>
-                <input asp-for="BookingDate" class="form-control" />
-                <span asp-validation-for="BookingDate" class="text-danger"></span>
+            <input type="hidden" asp-for="EventId" />
+            
+            <div class="form-group mb-3">
+                <label asp-for="SelectedTicketTypeId" class="control-label"></label>
+                <select asp-for="SelectedTicketTypeId" class="form-control">
+                    @if (Model.TicketTypes != null)
+                    {
+                        foreach (var ticket in Model.TicketTypes)
+                        {
+                            <option value="@ticket.TicketTypeId">
+                                @ticket.TypeName - $@ticket.Price (Available: @ticket.AvailableSeats)
+                            </option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="SelectedTicketTypeId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="TotalAmount" class="control-label"></label>
-                <input asp-for="TotalAmount" class="form-control" />
-                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input asp-for="Quantity" class="form-control" type="number" min="1" max="10" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="BookingStatus" class="control-label"></label>
-                <input asp-for="BookingStatus" class="form-control" />
-                <span asp-validation-for="BookingStatus" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MemberId" class="control-label"></label>
-                <select asp-for="MemberId" class ="form-control" asp-items="ViewBag.MemberId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="EventId" class="control-label"></label>
-                <select asp-for="EventId" class ="form-control" asp-items="ViewBag.EventId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Confirm Booking" class="btn btn-primary" />
+                <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
