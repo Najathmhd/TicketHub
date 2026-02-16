@@ -1,6 +1,52 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
+<div class="container mt-5">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+        </div>
+        <div class="card-body p-4">
+            <p class="text-muted">Last Updated: February 16, 2026</p>
 
-<p>Use this page to detail your site's privacy policy.</p>
+            <section class="mb-4">
+                <h2 class="h5 fw-bold text-dark">1. Information We Collect</h2>
+                <p>We collect information that you provide directly to us when you create an account, book a ticket, or contact us for support. This includes:</p>
+                <ul>
+                    <li>Name and contact information (Email address, Phone number).</li>
+                    <li>Account credentials.</li>
+                    <li>Payment information (processed securely through our mock payment simulation).</li>
+                    <li>Event-related preferences and history.</li>
+                </ul>
+            </section>
+
+            <section class="mb-4">
+                <h2 class="h5 fw-bold text-dark">2. How We Use Your Information</h2>
+                <p>Your information is used to provide, maintain, and improve our ticketing services, including:</p>
+                <ul>
+                    <li>Processing your event bookings and payments.</li>
+                    <li>Sending you booking confirmations and event updates.</li>
+                    <li>Responding to your inquiries and support requests.</li>
+                    <li>Enhancing the security and integrity of our platform.</li>
+                </ul>
+            </section>
+
+            <section class="mb-4">
+                <h2 class="h5 fw-bold text-dark">3. Data Security</h2>
+                <p>We implement a variety of security measures to maintain the safety of your personal information. Your personal data is contained behind secured networks and is only accessible by a limited number of persons who have special access rights to such systems.</p>
+            </section>
+
+            <section class="mb-4">
+                <h2 class="h5 fw-bold text-dark">4. Cookies</h2>
+                <p>TicketHub uses cookies to help us remember and process the items in your booking flow and understand your preferences for future visits.</p>
+            </section>
+
+            <section class="mb-0">
+                <h2 class="h5 fw-bold text-dark">5. Contact Us</h2>
+                <p>If there are any questions regarding this privacy policy, you may contact us using the information below:</p>
+                <p class="mb-0">Email: najamhd037@gmail.com</p>
+                <p>Support Section: <a asp-controller="Inquiries" asp-action="Create">Submit an Inquiry</a></p>
+            </section>
+        </div>
+    </div>
+</div>
