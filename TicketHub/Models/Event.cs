@@ -37,6 +37,13 @@ public partial class Event
     [Column("VenueID")]
     public int VenueId { get; set; }
 
+    [Column("OrganizerID")]
+    public int? OrganizerId { get; set; }
+
+    [ForeignKey("OrganizerId")]
+    [InverseProperty("OrganizedEvents")] 
+    public virtual Member? Organizer { get; set; }
+
     [InverseProperty("Event")]
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 

@@ -52,4 +52,7 @@ public partial class Member
 
     [InverseProperty("Member")]
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    [InverseProperty("Organizer")]
+    public virtual ICollection<Event> OrganizedEvents { get; set; } = new List<Event>();
 }

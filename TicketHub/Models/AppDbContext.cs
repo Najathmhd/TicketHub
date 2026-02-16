@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace TicketHub.Models;
 
-public partial class AppDbContext : DbContext
+public partial class AppDbContext : IdentityDbContext<IdentityUser>
 {
     public AppDbContext()
     {
@@ -41,6 +41,8 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); // Important for Identity
+
         modelBuilder.Entity<Booking>(entity =>
         {
             entity.HasKey(e => e.BookingId).HasName("PK__Booking__73951ACD6855C183");
