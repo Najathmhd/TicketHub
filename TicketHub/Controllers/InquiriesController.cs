@@ -7,23 +7,40 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TicketHub.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace TicketHub.Controllers
 {
     public class InquiriesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public InquiriesController(AppDbContext context)
+        public InquiriesController(AppDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Inquiries
+        [Authorize]
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Inquiries.Include(i => i.Member);
-            return View(await appDbContext.ToListAsync());
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var query = _context.Inquiries.Include(i => i.Member).AsQueryable();
+
+            if (!User.IsInRole("Admin"))
+            {
+                var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == user.Email);
+                if (member != null)
+                {
+                    query = query.Where(i => i.MemberId == member.MemberId);
+                }
+            }
+
+            return View(await query.ToListAsync());
         }
 
         // GET: Inquiries/Details/5
@@ -42,31 +59,46 @@ namespace TicketHub.Controllers
                 return NotFound();
             }
 
+            // Authorization check
+            if (!User.IsInRole("Admin"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (inquiry.Member.Email != user?.Email) return Forbid();
+            }
+
             return View(inquiry);
         }
 
         // GET: Inquiries/Create
-        [AllowAnonymous]
+        [Authorize]
         public IActionResult Create()
         {
-            ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId");
             return View();
         }
 
         // POST: Inquiries/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("InquiryId,GuestEmail,Message,InquiryDate,Status,MemberId")] Inquiry inquiry)
+        public async Task<IActionResult> Create([Bind("Message")] Inquiry inquiry)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == user.Email);
+            if (member == null) return NotFound("Member not found.");
+
+            inquiry.MemberId = member.MemberId;
+            inquiry.InquiryDate = DateOnly.FromDateTime(DateTime.Now);
+            inquiry.Status = "New";
+            inquiry.GuestEmail = user.Email;
+
             if (ModelState.IsValid)
             {
                 _context.Add(inquiry);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId", inquiry.MemberId);
             return View(inquiry);
         }
 

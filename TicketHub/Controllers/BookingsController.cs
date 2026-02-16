@@ -35,7 +35,10 @@ namespace TicketHub.Controllers
                  return Challenge();
             }
 
-            var query = _context.Bookings.Include(b => b.Event).Include(b => b.Member).AsQueryable();
+            var query = _context.Bookings
+                .Include(b => b.Event)
+                .Include(b => b.Member)
+                .AsQueryable();
 
             if (!User.IsInRole("Admin"))
             {
@@ -46,7 +49,7 @@ namespace TicketHub.Controllers
                  }
                  else
                  {
-                     return View(new List<Booking>()); // No member record found
+                     return View(new List<Booking>());
                  }
             }
 
