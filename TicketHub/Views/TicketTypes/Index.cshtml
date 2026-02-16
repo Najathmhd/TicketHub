@@ -1,0 +1,59 @@
+﻿@model IEnumerable<TicketHub.Models.TicketType>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TypeName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SeatLimit)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AvailableSeats)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TypeName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SeatLimit)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AvailableSeats)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Event.EventId)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.TicketTypeId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.TicketTypeId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.TicketTypeId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
