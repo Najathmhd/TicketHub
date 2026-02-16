@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using TicketHub.Models;
 
 namespace TicketHub.Areas.Identity.Pages.Account
@@ -121,6 +122,22 @@ namespace TicketHub.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+                // Check if user already exists in Identity
+                var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError(string.Empty, "Email is already registered.");
+                    return Page();
+                }
+
+                // Check if member already exists in our database
+                var existingMember = await _context.Members.AnyAsync(m => m.Email == Input.Email);
+                if (existingMember)
+                {
+                    ModelState.AddModelError(string.Empty, "A member with this email already exists.");
+                    return Page();
+                }
+
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -130,6 +147,7 @@ namespace TicketHub.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                    await _userManager.AddToRoleAsync(user, "Customer");
 
                     // Create Member entity
                     var member = new Member
