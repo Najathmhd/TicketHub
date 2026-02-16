@@ -87,6 +87,8 @@ namespace TicketHub.Controllers
             var evnt = await _context.Events
                 .Include(e => e.Category)
                 .Include(e => e.Venue)
+                .Include(e => e.Reviews)
+                    .ThenInclude(r => r.Member)
                 .FirstOrDefaultAsync(m => m.EventId == id);
 
             if (evnt == null)

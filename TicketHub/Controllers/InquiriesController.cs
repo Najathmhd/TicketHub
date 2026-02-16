@@ -103,6 +103,7 @@ namespace TicketHub.Controllers
         }
 
         // GET: Inquiries/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -110,31 +111,41 @@ namespace TicketHub.Controllers
                 return NotFound();
             }
 
-            var inquiry = await _context.Inquiries.FindAsync(id);
+            var inquiry = await _context.Inquiries.Include(i => i.Member).FirstOrDefaultAsync(i => i.InquiryId == id);
             if (inquiry == null)
             {
                 return NotFound();
             }
-            ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId", inquiry.MemberId);
+
+            // Security: Only Admins can edit (usually for status updates) 
+            // Owners can't really edit content once sent, but let's allow Admin for responses/status
+            if (!User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             return View(inquiry);
         }
 
         // POST: Inquiries/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("InquiryId,GuestEmail,Message,InquiryDate,Status,MemberId")] Inquiry inquiry)
+        public async Task<IActionResult> Edit(int id, [Bind("InquiryId,Status")] Inquiry inquiryData)
         {
-            if (id != inquiry.InquiryId)
+            if (id != inquiryData.InquiryId)
             {
                 return NotFound();
             }
+
+            var inquiry = await _context.Inquiries.FindAsync(id);
+            if (inquiry == null) return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    inquiry.Status = inquiryData.Status;
                     _context.Update(inquiry);
                     await _context.SaveChangesAsync();
                 }
@@ -151,11 +162,11 @@ namespace TicketHub.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId", inquiry.MemberId);
             return View(inquiry);
         }
 
         // GET: Inquiries/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -171,20 +182,33 @@ namespace TicketHub.Controllers
                 return NotFound();
             }
 
+            // Security: Only Admin or Owner can delete
+            if (!User.IsInRole("Admin"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (inquiry.Member?.Email != user?.Email) return Forbid();
+            }
+
             return View(inquiry);
         }
 
         // POST: Inquiries/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var inquiry = await _context.Inquiries.FindAsync(id);
-            if (inquiry != null)
+            var inquiry = await _context.Inquiries.Include(i => i.Member).FirstOrDefaultAsync(i => i.InquiryId == id);
+            if (inquiry == null) return NotFound();
+
+            // Security: Only Admin or Owner can delete
+            if (!User.IsInRole("Admin"))
             {
-                _context.Inquiries.Remove(inquiry);
+                var user = await _userManager.GetUserAsync(User);
+                if (inquiry.Member?.Email != user?.Email) return Forbid();
             }
 
+            _context.Inquiries.Remove(inquiry);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

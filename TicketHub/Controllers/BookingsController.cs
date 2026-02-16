@@ -113,9 +113,19 @@ namespace TicketHub.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Re-populate TicketTypes if validation fails
-                var eventEntity = await _context.Events.Include(e => e.TicketTypes).FirstOrDefaultAsync(e => e.EventId == castingData.EventId);
-                castingData.TicketTypes = eventEntity?.TicketTypes;
+                // Re-populate all display fields if validation fails
+                var ticketEvent = await _context.Events
+                    .Include(e => e.Venue)
+                    .Include(e => e.TicketTypes)
+                    .FirstOrDefaultAsync(m => m.EventId == castingData.EventId);
+                
+                if (ticketEvent != null)
+                {
+                    castingData.EventTitle = ticketEvent.Title;
+                    castingData.EventDate = ticketEvent.EventDate;
+                    castingData.VenueName = ticketEvent.Venue?.VenueName;
+                    castingData.TicketTypes = ticketEvent.TicketTypes;
+                }
                 return View(castingData);
             }
 

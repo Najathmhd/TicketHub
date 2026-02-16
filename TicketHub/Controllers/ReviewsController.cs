@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TicketHub.Models;
 
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace TicketHub.Controllers
 {
@@ -15,10 +16,12 @@ namespace TicketHub.Controllers
     public class ReviewsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ReviewsController(AppDbContext context)
+        public ReviewsController(AppDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Reviews
@@ -50,28 +53,44 @@ namespace TicketHub.Controllers
         }
 
         // GET: Reviews/Create
-        public IActionResult Create()
+        public IActionResult Create(int? eventId)
         {
-            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventId");
-            ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId");
+            if (eventId == null)
+            {
+                return RedirectToAction("Index", "Events");
+            }
+
+            ViewData["EventId"] = eventId;
             return View();
         }
 
         // POST: Reviews/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ReviewId,Rating,Comment,ReviewDate,MemberId,EventId")] Review review)
+        public async Task<IActionResult> Create([Bind("Rating,Comment,EventId")] Review review)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == user.Email);
+            if (member == null)
+            {
+                return RedirectToAction("Register", "Account", new { area = "Identity" });
+            }
+
             if (ModelState.IsValid)
             {
+                review.MemberId = member.MemberId;
+                review.ReviewDate = DateOnly.FromDateTime(DateTime.Now);
+
                 _context.Add(review);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details", "Events", new { id = review.EventId });
             }
-            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventId", review.EventId);
-            ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId", review.MemberId);
+            ViewData["EventId"] = review.EventId;
             return View(review);
         }
 
