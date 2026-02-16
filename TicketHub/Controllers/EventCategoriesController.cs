@@ -127,11 +127,17 @@ namespace TicketHub.Controllers
             }
 
             var eventCategory = await _context.EventCategories
+                .Include(ec => ec.Events)
                 .FirstOrDefaultAsync(m => m.CategoryId == id);
+            
             if (eventCategory == null)
             {
                 return NotFound();
             }
+
+            // Check if there are any events linked to this category
+            ViewBag.HasEvents = eventCategory.Events.Any();
+            ViewBag.ErrorMessage = TempData["ErrorMessage"];
 
             return View(eventCategory);
         }
@@ -141,12 +147,22 @@ namespace TicketHub.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var eventCategory = await _context.EventCategories.FindAsync(id);
-            if (eventCategory != null)
+            var eventCategory = await _context.EventCategories
+                .Include(ec => ec.Events)
+                .FirstOrDefaultAsync(m => m.CategoryId == id);
+
+            if (eventCategory == null)
             {
-                _context.EventCategories.Remove(eventCategory);
+                return NotFound();
             }
 
+            if (eventCategory.Events.Any())
+            {
+                TempData["ErrorMessage"] = "Cannot delete this category because it is associated with existing events.";
+                return RedirectToAction(nameof(Delete), new { id = id });
+            }
+
+            _context.EventCategories.Remove(eventCategory);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

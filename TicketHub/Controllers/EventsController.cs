@@ -229,6 +229,9 @@ namespace TicketHub.Controllers
             var evnt = await _context.Events
                 .Include(e => e.Category)
                 .Include(e => e.Venue)
+                .Include(e => e.TicketTypes)
+                .Include(e => e.Bookings)
+                .Include(e => e.Reviews)
                 .FirstOrDefaultAsync(m => m.EventId == id);
 
             if (evnt == null)
@@ -247,6 +250,12 @@ namespace TicketHub.Controllers
                 }
             }
 
+            // Check for dependencies
+            ViewBag.HasTickets = evnt.TicketTypes.Any();
+            ViewBag.HasBookings = evnt.Bookings.Any();
+            ViewBag.HasReviews = evnt.Reviews.Any();
+            ViewBag.ErrorMessage = TempData["ErrorMessage"];
+
             return View(evnt);
         }
 
@@ -255,23 +264,41 @@ namespace TicketHub.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var evnt = await _context.Events.FindAsync(id);
-            if (evnt != null)
-            {
-                // Authorization Check
-                if (User.IsInRole("Organizer"))
-                {
-                    var user = await _userManager.GetUserAsync(User);
-                    var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == user.Email);
-                    if (member == null || evnt.OrganizerId != member.MemberId)
-                    {
-                        return Forbid();
-                    }
-                }
+            var evnt = await _context.Events
+                .Include(e => e.TicketTypes)
+                .Include(e => e.Bookings)
+                .Include(e => e.Reviews)
+                .FirstOrDefaultAsync(m => m.EventId == id);
 
-                _context.Events.Remove(evnt);
+            if (evnt == null)
+            {
+                return NotFound();
             }
 
+            // Authorization Check
+            if (User.IsInRole("Organizer"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == user.Email);
+                if (member == null || evnt.OrganizerId != member.MemberId)
+                {
+                    return Forbid();
+                }
+            }
+
+            // Check for dependencies
+            var dependencies = new List<string>();
+            if (evnt.TicketTypes.Any()) dependencies.Add("ticket types");
+            if (evnt.Bookings.Any()) dependencies.Add("bookings");
+            if (evnt.Reviews.Any()) dependencies.Add("reviews");
+
+            if (dependencies.Any())
+            {
+                TempData["ErrorMessage"] = $"Cannot delete this event because it is associated with existing {string.Join(", ", dependencies)}.";
+                return RedirectToAction(nameof(Delete), new { id = id });
+            }
+
+            _context.Events.Remove(evnt);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
