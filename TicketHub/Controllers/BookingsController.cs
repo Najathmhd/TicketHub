@@ -160,28 +160,37 @@ namespace TicketHub.Controllers
                  EventId = castingData.EventId
             };
 
-            _context.Add(booking);
-            await _context.SaveChangesAsync();
-
-            // Create Booking Detail
-            var bookingDetail = new BookingDetail
+            try 
             {
-                BookingId = booking.BookingId,
-                TicketTypeId = ticketType.TicketTypeId,
-                Quantity = castingData.Quantity,
-                SubTotal = ticketType.Price * castingData.Quantity
-            };
-            _context.BookingDetails.Add(bookingDetail); // Assuming BookingDetail entity exists and has these fields.
-            // Wait, I need to check BookingDetail properties.
-            // Let's assume standard structure, if not I'll fix it.
+                _context.Add(booking);
+                await _context.SaveChangesAsync();
 
-            // Update Available Seats
-            ticketType.AvailableSeats -= castingData.Quantity;
+                // Create Booking Detail
+                var bookingDetail = new BookingDetail
+                {
+                    BookingId = booking.BookingId,
+                    TicketTypeId = ticketType.TicketTypeId,
+                    Quantity = castingData.Quantity,
+                    SubTotal = ticketType.Price * castingData.Quantity
+                };
+                _context.BookingDetails.Add(bookingDetail);
 
-            _context.Update(ticketType);
-            await _context.SaveChangesAsync();
+                // Update Available Seats
+                ticketType.AvailableSeats -= castingData.Quantity;
+                _context.Update(ticketType);
 
-            return RedirectToAction("Pay", "Payments", new { bookingId = booking.BookingId });
+                await _context.SaveChangesAsync();
+                
+                return RedirectToAction("Pay", "Payments", new { bookingId = booking.BookingId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while creating your booking: " + ex.Message);
+                // Re-populate TicketTypes
+                var eventEntity = await _context.Events.Include(e => e.TicketTypes).FirstOrDefaultAsync(e => e.EventId == castingData.EventId);
+                castingData.TicketTypes = eventEntity?.TicketTypes;
+                return View(castingData);
+            }
         }
 
         // GET: Bookings/Edit/5

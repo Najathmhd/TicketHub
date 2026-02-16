@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace TicketHub.Models;
 
@@ -30,6 +31,7 @@ public partial class Inquiry
     [Column("MemberID")]
     public int MemberId { get; set; }
 
+    [ValidateNever]
     [ForeignKey("MemberId")]
     [InverseProperty("Inquiries")]
     public virtual Member Member { get; set; } = null!;

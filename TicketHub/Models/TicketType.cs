@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace TicketHub.Models;
 
@@ -27,9 +28,11 @@ public partial class TicketType
     [Column("EventID")]
     public int EventId { get; set; }
 
+    [ValidateNever]
     [InverseProperty("TicketType")]
     public virtual ICollection<BookingDetail> BookingDetails { get; set; } = new List<BookingDetail>();
 
+    [ValidateNever]
     [ForeignKey("EventId")]
     [InverseProperty("TicketTypes")]
     public virtual Event Event { get; set; } = null!;

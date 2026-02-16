@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace TicketHub.Models;
 
@@ -28,10 +29,12 @@ public partial class Review
     [Column("EventID")]
     public int EventId { get; set; }
 
+    [ValidateNever]
     [ForeignKey("EventId")]
     [InverseProperty("Reviews")]
     public virtual Event Event { get; set; } = null!;
 
+    [ValidateNever]
     [ForeignKey("MemberId")]
     [InverseProperty("Reviews")]
     public virtual Member Member { get; set; } = null!;

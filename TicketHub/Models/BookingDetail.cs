@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace TicketHub.Models;
 
@@ -24,10 +25,12 @@ public partial class BookingDetail
     [Column("TicketTypeID")]
     public int TicketTypeId { get; set; }
 
+    [ValidateNever]
     [ForeignKey("BookingId")]
     [InverseProperty("BookingDetails")]
     public virtual Booking Booking { get; set; } = null!;
 
+    [ValidateNever]
     [ForeignKey("TicketTypeId")]
     [InverseProperty("BookingDetails")]
     public virtual TicketType TicketType { get; set; } = null!;
