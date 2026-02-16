@@ -1,0 +1,103 @@
+@model IEnumerable<TicketHub.Models.Booking>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Admin Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Overview</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">Total Events: @ViewData["TotalEvents"]</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="Events" asp-action="Index">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">Total Bookings: @ViewData["TotalBookings"]</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="Bookings" asp-action="Index">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">Total Revenue: $@ViewData["TotalRevenue"]</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Reports</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">Total Members: @ViewData["TotalMembers"]</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="Members" asp-action="Index">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table me-1"></i>
+                    Recent Bookings
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Event</th>
+                                <th>Member</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var booking in Model)
+                            {
+                                <tr>
+                                    <td>@booking.BookingId</td>
+                                    <td>@booking.Event?.Title</td>
+                                    <td>@booking.Member?.FullName</td>
+                                    <td>@booking.BookingDate</td>
+                                    <td>$@booking.TotalAmount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+         <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-cog me-1"></i>
+                    Quick Actions
+                </div>
+                <div class="card-body">
+                     <div class="d-grid gap-2">
+                        <a asp-controller="Events" asp-action="Create" class="btn btn-primary">Create New Event</a>
+                        <a asp-controller="EventCategories" asp-action="Create" class="btn btn-secondary">Add Event Category</a>
+                        <a asp-controller="Venues" asp-action="Create" class="btn btn-info">Add New Venue</a>
+                        <a asp-controller="TicketTypes" asp-action="Create" class="btn btn-warning">Manage Ticket Types</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
