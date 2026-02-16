@@ -1,8 +1,55 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welcome to TicketHub";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-section text-center py-5 bg-light rounded-3 mb-4 shadow-sm">
+    <div class="container py-4">
+        <h1 class="display-4 fw-bold">Find Your Next Experience</h1>
+        <p class="lead mb-4">Discover and book tickets for the best concerts, tech summits, and sports events.</p>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form asp-controller="Events" asp-action="Index" method="get" class="d-flex gap-2">
+                    <input type="text" name="searchString" class="form-control form-control-lg shadow-sm" placeholder="Search events by title or description..." aria-label="Search">
+                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">Search</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a asp-controller="Events" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">Explore All Events</a>
+        </div>
+    </div>
 </div>
+
+<div class="container">
+    <div class="row text-center mt-5">
+        <div class="col-md-4">
+            <div class="p-3">
+                <div class="h1 mb-3">🎵</div>
+                <h3>Music</h3>
+                <p>From rock concerts to jazz nights, find the beat that moves you.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3">
+                <div class="h1 mb-3">💻</div>
+                <h3>Tech</h3>
+                <p>Stay ahead of the curve with our curated technology summits.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3">
+                <div class="h1 mb-3">🏆</div>
+                <h3>Sports</h3>
+                <p>Cheer for your favorite teams in the most anticipated matches.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+</style>
