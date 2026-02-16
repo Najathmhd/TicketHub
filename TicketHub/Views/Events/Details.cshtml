@@ -55,6 +55,17 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.EventId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+    {
+         <a asp-controller="Bookings" asp-action="Create" asp-route-eventId="@Model?.EventId" class="btn btn-primary">Book Now</a>
+    }
+    else if (!User.Identity.IsAuthenticated)
+    {
+        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">Login to Book</a>
+    }
+    @if (User.IsInRole("Admin") || User.IsInRole("Organizer"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.EventId" class="btn btn-warning">Edit</a>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
