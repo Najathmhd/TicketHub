@@ -1,0 +1,25 @@
+@model int
+
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+<div class="container mt-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-success mb-3">
+                <div class="card-header bg-success text-white">Payment Successful!</div>
+                <div class="card-body text-success">
+                    <h5 class="card-title">Thank you for your booking.</h5>
+                    <p class="card-text">Your booking #@Model has been confirmed.</p>
+                    <div class="my-4">
+                        <i class="fas fa-check-circle fa-5x text-success"></i>
+                    </div>
+                    <a asp-controller="Tickets" asp-action="GetTicket" asp-route-bookingId="@Model" class="btn btn-success">Get Ticket</a>
+                    <a asp-controller="Bookings" asp-action="Details" asp-route-id="@Model" class="btn btn-primary">View Booking Details</a>
+                    <a asp-controller="Events" asp-action="Index" class="btn btn-outline-secondary">Back to Events</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,46 @@
+@model TicketHub.Models.Booking
+
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title">Complete Payment</h3>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-subtitle mb-2 text-muted">Booking Reference: #@Model.BookingId</h5>
+                    <p class="card-text">Event: <strong>@Model.Event?.Title</strong></p>
+                    <p class="card-text">Total Amount: <span class="h4 text-success">$@Model.TotalAmount</span></p>
+                    
+                    <hr />
+
+                    <form asp-action="Process" method="post">
+                        <input type="hidden" name="bookingId" value="@Model.BookingId" />
+                        
+                        <div class="mb-3">
+                            <label for="paymentMethod" class="form-label">Select Payment Method</label>
+                            <select class="form-select" id="paymentMethod" name="paymentMethod" required>
+                                <option value="Credit Card">Credit Card (Mock)</option>
+                                <option value="PayPal">PayPal (Mock)</option>
+                                <option value="Apple Pay">Apple Pay (Mock)</option>
+                            </select>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <small><i class="fas fa-info-circle"></i> This is a simulation. No real money will be charged.</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">Pay Now</button>
+                            <a asp-controller="Bookings" asp-action="Delete" asp-route-id="@Model.BookingId" class="btn btn-outline-danger">Cancel Booking</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
