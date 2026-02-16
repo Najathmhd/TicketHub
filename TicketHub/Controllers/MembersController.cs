@@ -7,8 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TicketHub.Models;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace TicketHub.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class MembersController : Controller
     {
         private readonly AppDbContext _context;

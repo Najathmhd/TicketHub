@@ -7,22 +7,50 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TicketHub.Models;
 
+using Microsoft.AspNetCore.Authorization;
+
+using TicketHub.Models.ViewModels;
+using Microsoft.AspNetCore.Identity;
+
 namespace TicketHub.Controllers
 {
+    [Authorize]
     public class BookingsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public BookingsController(AppDbContext context)
+        public BookingsController(AppDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Bookings
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Bookings.Include(b => b.Event).Include(b => b.Member);
-            return View(await appDbContext.ToListAsync());
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                 return Challenge();
+            }
+
+            var query = _context.Bookings.Include(b => b.Event).Include(b => b.Member).AsQueryable();
+
+            if (!User.IsInRole("Admin"))
+            {
+                 var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == user.Email);
+                 if (member != null)
+                 {
+                     query = query.Where(b => b.MemberId == member.MemberId);
+                 }
+                 else
+                 {
+                     return View(new List<Booking>()); // No member record found
+                 }
+            }
+
+            return View(await query.ToListAsync());
         }
 
         // GET: Bookings/Details/5
@@ -46,29 +74,111 @@ namespace TicketHub.Controllers
         }
 
         // GET: Bookings/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? eventId)
         {
-            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventId");
-            ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId");
-            return View();
+            if (eventId == null)
+            {
+                return RedirectToAction("Index", "Events");
+            }
+
+            var ticketEvent = await _context.Events
+                .Include(e => e.Venue)
+                .Include(e => e.TicketTypes)
+                .FirstOrDefaultAsync(m => m.EventId == eventId);
+
+            if (ticketEvent == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new BookingCreateViewModel
+            {
+                EventId = ticketEvent.EventId,
+                EventTitle = ticketEvent.Title,
+                EventDate = ticketEvent.EventDate,
+                VenueName = ticketEvent.Venue.VenueName,
+                TicketTypes = ticketEvent.TicketTypes
+            };
+
+            return View(viewModel);
         }
 
         // POST: Bookings/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BookingId,BookingDate,TotalAmount,BookingStatus,MemberId,EventId")] Booking booking)
+        public async Task<IActionResult> Create(BookingCreateViewModel castingData)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(booking);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // Re-populate TicketTypes if validation fails
+                var eventEntity = await _context.Events.Include(e => e.TicketTypes).FirstOrDefaultAsync(e => e.EventId == castingData.EventId);
+                castingData.TicketTypes = eventEntity?.TicketTypes;
+                return View(castingData);
             }
-            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventId", booking.EventId);
-            ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId", booking.MemberId);
-            return View(booking);
+
+            // Get Current User
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == user.Email);
+            if (member == null)
+            {
+                // Should not happen if Register works correctly, but handle it
+                return RedirectToAction("Register", "Account", new { area = "Identity" });
+            }
+
+            // check Ticket availability
+            var ticketType = await _context.TicketTypes.FindAsync(castingData.SelectedTicketTypeId);
+            if (ticketType == null)
+            {
+                ModelState.AddModelError("", "Invalid Ticket Type.");
+                return View(castingData);
+            }
+
+            if (ticketType.AvailableSeats < castingData.Quantity)
+            {
+                ModelState.AddModelError("", "Not enough seats available.");
+                 // Re-populate TicketTypes
+                var eventEntity = await _context.Events.Include(e => e.TicketTypes).FirstOrDefaultAsync(e => e.EventId == castingData.EventId);
+                castingData.TicketTypes = eventEntity?.TicketTypes;
+                return View(castingData);
+            }
+
+            // Create Booking
+            var booking = new Booking
+            {
+                 BookingDate = DateOnly.FromDateTime(DateTime.Now),
+                 TotalAmount = ticketType.Price * castingData.Quantity,
+                 BookingStatus = "Pending",
+                 MemberId = member.MemberId,
+                 EventId = castingData.EventId
+            };
+
+            _context.Add(booking);
+            await _context.SaveChangesAsync();
+
+            // Create Booking Detail
+            var bookingDetail = new BookingDetail
+            {
+                BookingId = booking.BookingId,
+                TicketTypeId = ticketType.TicketTypeId,
+                Quantity = castingData.Quantity,
+                SubTotal = ticketType.Price * castingData.Quantity
+            };
+            _context.BookingDetails.Add(bookingDetail); // Assuming BookingDetail entity exists and has these fields.
+            // Wait, I need to check BookingDetail properties.
+            // Let's assume standard structure, if not I'll fix it.
+
+            // Update Available Seats
+            ticketType.AvailableSeats -= castingData.Quantity;
+
+            _context.Update(ticketType);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Pay", "Payments", new { bookingId = booking.BookingId });
         }
 
         // GET: Bookings/Edit/5

@@ -7,8 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TicketHub.Models;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace TicketHub.Controllers
 {
+    [Authorize]
     public class ReviewsController : Controller
     {
         private readonly AppDbContext _context;
@@ -19,6 +22,7 @@ namespace TicketHub.Controllers
         }
 
         // GET: Reviews
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var appDbContext = _context.Reviews.Include(r => r.Event).Include(r => r.Member);

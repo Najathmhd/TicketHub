@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TicketHub.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TicketHub.Controllers
 {
@@ -45,6 +46,7 @@ namespace TicketHub.Controllers
         }
 
         // GET: Inquiries/Create
+        [AllowAnonymous]
         public IActionResult Create()
         {
             ViewData["MemberId"] = new SelectList(_context.Members, "MemberId", "MemberId");
