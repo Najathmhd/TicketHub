@@ -25,18 +25,27 @@
             
             <div class="form-group mb-3">
                 <label asp-for="SelectedTicketTypeId" class="control-label"></label>
-                <select asp-for="SelectedTicketTypeId" class="form-select shadow-sm">
-                    <option value="">-- Select Ticket Type --</option>
-                    @if (Model.TicketTypes != null)
-                    {
-                        foreach (var ticket in Model.TicketTypes)
+                @if (Model.TicketTypes != null && Model.TicketTypes.Any())
+                {
+                    <select asp-for="SelectedTicketTypeId" class="form-select shadow-sm">
+                        <option value="">-- Select Ticket Type --</option>
+                        @foreach (var ticket in Model.TicketTypes)
                         {
                             <option value="@ticket.TicketTypeId">
                                 @ticket.TypeName - $@ticket.Price (Available: @ticket.AvailableSeats)
                             </option>
                         }
-                    }
-                </select>
+                    </select>
+                }
+                else
+                {
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i> Tickets are not yet available for this event.
+                    </div>
+                    <select class="form-select" disabled>
+                        <option>No tickets available</option>
+                    </select>
+                }
                 <span asp-validation-for="SelectedTicketTypeId" class="text-danger"></span>
             </div>
 
@@ -47,7 +56,14 @@
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Confirm Booking" class="btn btn-primary" />
+                @if (Model.TicketTypes != null && Model.TicketTypes.Any())
+                {
+                    <input type="submit" value="Confirm Booking" class="btn btn-primary" />
+                }
+                else
+                {
+                    <input type="submit" value="Confirm Booking" class="btn btn-primary" disabled />
+                }
                 <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId" class="btn btn-secondary">Cancel</a>
             </div>
         </form>

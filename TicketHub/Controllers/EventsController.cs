@@ -112,6 +112,7 @@ namespace TicketHub.Controllers
             var evnt = await _context.Events
                 .Include(e => e.Category)
                 .Include(e => e.Venue)
+                .Include(e => e.TicketTypes)
                 .Include(e => e.Reviews)
                     .ThenInclude(r => r.Member)
                 .FirstOrDefaultAsync(m => m.EventId == id);
@@ -152,7 +153,7 @@ namespace TicketHub.Controllers
 
                 _context.Add(evnt);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new { id = evnt.EventId });
             }
 
             ViewData["CategoryId"] = new SelectList(_context.EventCategories, "CategoryId", "CategoryName", evnt.CategoryId);
@@ -235,7 +236,7 @@ namespace TicketHub.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new { id = evnt.EventId });
             }
 
             ViewData["CategoryId"] = new SelectList(_context.EventCategories, "CategoryId", "CategoryName", evnt.CategoryId);
