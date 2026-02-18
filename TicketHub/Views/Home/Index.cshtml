@@ -39,10 +39,19 @@
             {
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm hover-up rounded-4 overflow-hidden">
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center border-bottom" style="height: 200px;">
-                            <div class="text-center">
-                                <i class="fas @(item.Category.CategoryName == "Music" ? "fa-music" : item.Category.CategoryName == "Tech" ? "fa-laptop" : "fa-calendar-alt") fa-3x text-primary opacity-25"></i>
-                                <h6 class="mt-2 text-muted small">@item.Category.CategoryName</h6>
+                        <div class="card-img-top position-relative" style="height: 220px;">
+                            @{
+                                var imageUrl = !string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : 
+                                               item.Category.CategoryName == "Music" ? "https://images.unsplash.com/photo-1514525253361-bee8a81abc00?auto=format&fit=crop&q=80&w=800" :
+                                               item.Category.CategoryName == "Tech" ? "https://images.unsplash.com/photo-1504384308090-c89e1207a8f0?auto=format&fit=crop&q=80&w=800" :
+                                               item.Category.CategoryName == "Sports" ? "https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&q=80&w=800" :
+                                               "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800";
+                            }
+                            <img src="@imageUrl" class="w-100 h-100 object-fit-cover" alt="@item.Title">
+                            <div class="position-absolute top-0 end-0 p-3">
+                                <span class="badge bg-white text-dark rounded-pill shadow-sm">
+                                    <i class="fas @(item.Category.CategoryName == "Music" ? "fa-music" : item.Category.CategoryName == "Tech" ? "fa-laptop" : "fa-calendar-alt") me-1"></i> @item.Category.CategoryName
+                                </span>
                             </div>
                         </div>
                         <div class="card-body p-4">

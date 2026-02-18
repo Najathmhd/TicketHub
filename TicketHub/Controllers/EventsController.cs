@@ -135,7 +135,7 @@ namespace TicketHub.Controllers
         // POST: Events/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EventId,Title,Description,EventDate,EventTime,EventStatus,CategoryId,VenueId")] Event evnt)
+        public async Task<IActionResult> Create([Bind("EventId,Title,Description,EventDate,EventTime,EventStatus,ImageUrl,CategoryId,VenueId")] Event evnt)
         {
             if (ModelState.IsValid)
             {
@@ -194,7 +194,7 @@ namespace TicketHub.Controllers
         // POST: Events/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("EventId,Title,Description,EventDate,EventTime,EventStatus,CategoryId,VenueId")] Event evnt)
+        public async Task<IActionResult> Edit(int id, [Bind("EventId,Title,Description,EventDate,EventTime,EventStatus,ImageUrl,CategoryId,VenueId")] Event evnt)
         {
             if (id != evnt.EventId)
             {

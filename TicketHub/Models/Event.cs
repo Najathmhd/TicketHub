@@ -32,6 +32,10 @@ public partial class Event
     [Unicode(false)]
     public string? EventStatus { get; set; }
 
+    [StringLength(255)]
+    [Unicode(false)]
+    public string? ImageUrl { get; set; }
+
     [Column("CategoryID")]
     public int CategoryId { get; set; }
 

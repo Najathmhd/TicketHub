@@ -33,10 +33,16 @@
                 <input asp-for="EventTime" class="form-control" />
                 <span asp-validation-for="EventTime" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="EventStatus" class="control-label"></label>
                 <input asp-for="EventStatus" class="form-control" />
                 <span asp-validation-for="EventStatus" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="ImageUrl" class="control-label">Event Image URL</label>
+                <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                <small class="text-muted">Leave blank to use category stock photo.</small>
             </div>
             <div class="form-group">
                 <label asp-for="CategoryId" class="control-label"></label>

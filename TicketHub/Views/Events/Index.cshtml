@@ -61,7 +61,18 @@
 <div class="row">
     @foreach (var item in Model) {
         <div class="col-md-4 mb-4">
-            <div class="card h-100">
+            <div class="card h-100 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="position-relative" style="height: 180px;">
+                    @{
+                        var imageUrl = !string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : 
+                                       item.Category.CategoryName == "Music" ? "https://images.unsplash.com/photo-1514525253361-bee8a81abc00?auto=format&fit=crop&q=80&w=800" :
+                                       item.Category.CategoryName == "Tech" ? "https://images.unsplash.com/photo-1504384308090-c89e1207a8f0?auto=format&fit=crop&q=80&w=800" :
+                                       item.Category.CategoryName == "Sports" ? "https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&q=80&w=800" :
+                                       "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800";
+                    }
+                    <img src="@imageUrl" class="w-100 h-100 object-fit-cover" alt="@item.Title">
+                    <span class="position-absolute top-0 end-0 m-3 badge bg-primary shadow-sm">@item.Category.CategoryName</span>
+                </div>
                 <div class="card-body">
                     <h5 class="card-title">@item.Title</h5>
                     <h6 class="card-subtitle mb-2 text-muted">@item.EventDate?.ToShortDateString() @item.EventTime</h6>
