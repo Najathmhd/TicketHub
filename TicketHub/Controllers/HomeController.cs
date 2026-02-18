@@ -1,21 +1,30 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TicketHub.Models;
 
 namespace TicketHub.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly AppDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(AppDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var upcomingEvents = await _context.Events
+                .Include(e => e.Category)
+                .Include(e => e.Venue)
+                .Where(e => e.EventDate >= DateOnly.FromDateTime(DateTime.Now))
+                .OrderBy(e => e.EventDate)
+                .Take(6)
+                .ToListAsync();
+
+            return View(upcomingEvents);
         }
 
         public IActionResult Privacy()

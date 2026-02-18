@@ -53,11 +53,25 @@ namespace TicketHub.Controllers
         }
 
         // GET: Reviews/Create
-        public IActionResult Create(int? eventId)
+        public async Task<IActionResult> Create(int? eventId)
         {
             if (eventId == null)
             {
                 return RedirectToAction("Index", "Events");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == user.Email);
+            if (member == null) return NotFound("Member record not found.");
+
+            // Check if member has a booking for this event
+            bool hasBooking = await _context.Bookings.AnyAsync(b => b.MemberId == member.MemberId && b.EventId == eventId);
+            if (!hasBooking)
+            {
+                TempData["ErrorMessage"] = "You can only review events you have booked.";
+                return RedirectToAction("Details", "Events", new { id = eventId });
             }
 
             ViewData["EventId"] = eventId;
@@ -83,6 +97,14 @@ namespace TicketHub.Controllers
 
             if (ModelState.IsValid)
             {
+                // Re-verify booking in POST for security
+                bool hasBooking = await _context.Bookings.AnyAsync(b => b.MemberId == member.MemberId && b.EventId == review.EventId);
+                if (!hasBooking)
+                {
+                    TempData["ErrorMessage"] = "Unauthorized: You have not booked this event.";
+                    return RedirectToAction("Details", "Events", new { id = review.EventId });
+                }
+
                 review.MemberId = member.MemberId;
                 review.ReviewDate = DateOnly.FromDateTime(DateTime.Now);
 

@@ -1,55 +1,139 @@
-﻿@{
-    ViewData["Title"] = "Welcome to TicketHub";
+﻿@model IEnumerable<TicketHub.Models.Event>
+@{
+    ViewData["Title"] = "Home Page";
 }
 
-<div class="hero-section text-center py-5 bg-light rounded-3 mb-4 shadow-sm">
-    <div class="container py-4">
-        <h1 class="display-4 fw-bold">Find Your Next Experience</h1>
-        <p class="lead mb-4">Discover and book tickets for the best concerts, tech summits, and sports events.</p>
+<div class="hero-section text-center py-5 bg-dark text-white rounded-4 mb-5 shadow-lg position-relative overflow-hidden">
+    <div class="hero-overlay"></div>
+    <div class="container py-5 position-relative z-1">
+        <h1 class="display-3 fw-bold mb-3">Welcome to TicketHub</h1>
+        <p class="lead mb-5 px-md-5">Discover and book tickets for the best concerts, tech summits, and sports events in your city.</p>
         
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <form asp-controller="Events" asp-action="Index" method="get" class="d-flex gap-2">
-                    <input type="text" name="searchString" class="form-control form-control-lg shadow-sm" placeholder="Search events by title or description..." aria-label="Search">
-                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">Search</button>
+            <div class="col-md-9 col-lg-7">
+                <form asp-controller="Events" asp-action="Index" method="get" class="search-box p-2 bg-white rounded-pill shadow">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-0"><i class="fas fa-search text-muted px-2"></i></span>
+                        <input type="text" name="searchString" class="form-control form-control-lg border-0 shadow-none bg-transparent" placeholder="What are you looking for today?">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4 ms-2">Find Events</button>
+                    </div>
                 </form>
             </div>
-        </div>
-        
-        <div class="mt-4">
-            <a asp-controller="Events" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">Explore All Events</a>
         </div>
     </div>
 </div>
 
-<div class="container">
-    <div class="row text-center mt-5">
-        <div class="col-md-4">
-            <div class="p-3">
-                <div class="h1 mb-3">🎵</div>
-                <h3>Music</h3>
-                <p>From rock concerts to jazz nights, find the beat that moves you.</p>
-            </div>
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Upcoming Events</h2>
+            <p class="text-muted mb-0">Don't miss out on these great experiences.</p>
         </div>
-        <div class="col-md-4">
-            <div class="p-3">
-                <div class="h1 mb-3">💻</div>
-                <h3>Tech</h3>
-                <p>Stay ahead of the curve with our curated technology summits.</p>
+        <a asp-controller="Events" asp-action="Index" class="btn btn-outline-primary rounded-pill">View All Events</a>
+    </div>
+
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-up rounded-4 overflow-hidden">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center border-bottom" style="height: 200px;">
+                            <div class="text-center">
+                                <i class="fas @(item.Category.CategoryName == "Music" ? "fa-music" : item.Category.CategoryName == "Tech" ? "fa-laptop" : "fa-calendar-alt") fa-3x text-primary opacity-25"></i>
+                                <h6 class="mt-2 text-muted small">@item.Category.CategoryName</h6>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">@item.Category.CategoryName</span>
+                                <small class="text-muted"><i class="fas fa-clock me-1"></i> @item.EventTime</small>
+                            </div>
+                            <h5 class="card-title fw-bold mb-2">@item.Title</h5>
+                            <p class="card-text text-muted small mb-4 line-clamp-3">@item.Description</p>
+                            
+                            <div class="mt-auto pt-3 border-top">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                    <small class="fw-bold">@item.Venue.VenueName</small>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <small class="text-muted d-block">Starting from</small>
+                                        <h5 class="mb-0 text-primary">@item.EventDate?.ToString("MMM dd, yyyy")</h5>
+                                    </div>
+                                    <a asp-controller="Events" asp-action="Details" asp-route-id="@item.EventId" class="btn btn-primary rounded-pill px-4">Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-info-circle fa-3x text-muted opacity-25 mb-3"></i>
+                <p class="text-muted h5">No upcoming events found at the moment. Please check back later!</p>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="p-3">
-                <div class="h1 mb-3">🏆</div>
-                <h3>Sports</h3>
-                <p>Cheer for your favorite teams in the most anticipated matches.</p>
-            </div>
-        </div>
+        }
     </div>
 </div>
 
 <style>
+    :root {
+        --primary-gold: #D4AF37;
+        --tickethub-blue: #002B5B;
+    }
+
     .hero-section {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        background-color: var(--tickethub-blue);
+        background-image: url('https://images.unsplash.com/photo-1514302240736-b1fee5989267?auto=format&fit=crop&q=80&w=2000');
+        background-size: cover;
+        background-position: center;
+        border: none;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgba(0,43,91,0.85) 0%, rgba(0,43,91,0.6) 100%);
+    }
+
+    .search-box {
+        transition: transform 0.3s ease;
+    }
+
+    .search-box:focus-within {
+        transform: translateY(-5px);
+    }
+
+    .hover-up {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .hover-up:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+    }
+
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        background-color: #0056b3;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #004494;
     }
 </style>

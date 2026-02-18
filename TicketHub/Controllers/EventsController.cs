@@ -46,33 +46,58 @@ namespace TicketHub.Controllers
 
         // GET: Events
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string searchString, int? categoryId, int? venueId)
+        public async Task<IActionResult> Index(string searchString, int? categoryId, int? venueId, DateOnly? startDate, DateOnly? endDate, decimal? minPrice, decimal? maxPrice)
         {
-            var appDbContext = _context.Events
+            var query = _context.Events
                 .Include(e => e.Category)
                 .Include(e => e.Venue)
+                .Include(e => e.TicketTypes)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                appDbContext = appDbContext.Where(s => s.Title.Contains(searchString) || s.Description.Contains(searchString));
+                query = query.Where(s => s.Title.Contains(searchString) || s.Description.Contains(searchString));
             }
 
             if (categoryId.HasValue)
             {
-                appDbContext = appDbContext.Where(s => s.CategoryId == categoryId);
+                query = query.Where(s => s.CategoryId == categoryId);
             }
 
-             if (venueId.HasValue)
+            if (venueId.HasValue)
             {
-                appDbContext = appDbContext.Where(s => s.VenueId == venueId);
+                query = query.Where(s => s.VenueId == venueId);
             }
 
-             ViewData["CategoryId"] = new SelectList(_context.EventCategories, "CategoryId", "CategoryName", categoryId);
-             ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", venueId);
-             ViewData["CurrentFilter"] = searchString;
+            if (startDate.HasValue)
+            {
+                query = query.Where(s => s.EventDate >= startDate);
+            }
 
-            return View(await appDbContext.ToListAsync());
+            if (endDate.HasValue)
+            {
+                query = query.Where(s => s.EventDate <= endDate);
+            }
+
+            if (minPrice.HasValue)
+            {
+                query = query.Where(s => s.TicketTypes.Any(tt => tt.Price >= minPrice));
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(s => s.TicketTypes.Any(tt => tt.Price <= maxPrice));
+            }
+
+            ViewData["CategoryId"] = new SelectList(_context.EventCategories, "CategoryId", "CategoryName", categoryId);
+            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", venueId);
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["StartDate"] = startDate?.ToString("yyyy-MM-dd");
+            ViewData["EndDate"] = endDate?.ToString("yyyy-MM-dd");
+            ViewData["MinPrice"] = minPrice;
+            ViewData["MaxPrice"] = maxPrice;
+
+            return View(await query.ToListAsync());
         }
 
         // GET: Events/Details/5
