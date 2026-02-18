@@ -25,7 +25,8 @@
             
             <div class="form-group mb-3">
                 <label asp-for="SelectedTicketTypeId" class="control-label"></label>
-                <select asp-for="SelectedTicketTypeId" class="form-control">
+                <select asp-for="SelectedTicketTypeId" class="form-select shadow-sm">
+                    <option value="">-- Select Ticket Type --</option>
                     @if (Model.TicketTypes != null)
                     {
                         foreach (var ticket in Model.TicketTypes)
