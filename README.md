@@ -95,7 +95,7 @@ Note: Change credentials before deploying to production.
 ### Step 1 – Clone Repository
 
 ```
-git clone https://github.com/your-username/EventsHub.git
+git clone https://github.com/Najathmhd/TicketHub.git
 cd EventsHub
 ```
 
